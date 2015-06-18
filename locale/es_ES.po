@@ -1,0 +1,53 @@
+# 
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "error:carrier.manifest:"
+msgid "Correos Manifest service is not available."
+msgstr "No está disponible el manifiesto Correos."
+
+msgctxt "error:stock.shipment.out:"
+msgid "Add a office Correos to delivery or change service"
+msgstr ""
+"Añade una oficina de Correos en la dirección de entrega o cambia de "
+"servicio."
+
+msgctxt "error:stock.shipment.out:"
+msgid "Correos not accept zip \"%(zip)s\""
+msgstr "Correos no accepta el código postal \"%(zip)s\"."
+
+msgctxt "error:stock.shipment.out:"
+msgid "Not available \"%(name)s\" label from Correos"
+msgstr "No se dispone la etiqueta \"%(name)s\" de Correos."
+
+msgctxt "error:stock.shipment.out:"
+msgid "Select a service or default service in Correos API"
+msgstr "Seleccione un servicio o un servicio por defecto en la API de Correos"
+
+msgctxt "field:carrier.api,correos_cc:"
+msgid "CC"
+msgstr "CC"
+
+msgctxt "field:carrier.api,correos_code:"
+msgid "Code"
+msgstr "Código"
+
+msgctxt "field:party.address,correos:"
+msgid "Correos"
+msgstr "Correos"
+
+msgctxt "help:carrier.api,correos_cc:"
+msgid "Correos Bank Number"
+msgstr "Número bancario para Correos"
+
+msgctxt "help:carrier.api,correos_code:"
+msgid "Correos Code (CodeEtiquetador)"
+msgstr "Código Correos (CodeEtiquetador)"
+
+msgctxt "help:party.address,correos:"
+msgid "Office Correos code to delivery shipment"
+msgstr "Código oficina Correos para la entrega"
+
+msgctxt "view:carrier.api:"
+msgid "Correos"
+msgstr "Correos"

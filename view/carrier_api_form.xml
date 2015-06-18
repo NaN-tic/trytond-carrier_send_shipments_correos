@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- This file is part of the carrier_send_shipments_correos module for Tryton.
+The COPYRIGHT file at the top level of this repository contains the full
+copyright notices and license terms. -->
+<data>
+    <xpath expr="/form/notebook/page[@id='api']" position="after">
+        <page string="Correos" id="correos" states="{'invisible': Not(Equal(Eval('method'), 'correos'))}">
+            <label name="correos_code"/>
+            <field name="correos_code"/>
+            <label name="correos_cc"/>
+            <field name="correos_cc"/>
+        </page>
+    </xpath>
+</data>
