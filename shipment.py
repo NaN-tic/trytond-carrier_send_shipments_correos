@@ -49,6 +49,18 @@ class ShipmentOut:
             packages = 1
 
         remitente_address = shipment.warehouse.address or shipment.company.party.addresses[0]
+        
+        if api.reference_origin and hasattr(shipment, 'origin'):
+            code = shipment.origin and shipment.origin.rec_name or shipment.code
+        else:
+            code = shipment.code
+
+        if code != shipment.code:
+            notes = '%s - %s\n' % (code, shipment.code)
+        else:
+            notes = '%s\n' % (shipment.code)
+        if shipment.carrier_notes:
+            notes += '%s\n' % shipment.carrier_notes
 
         data = {}
         data['TotalBultos'] = packages
@@ -70,8 +82,8 @@ class ShipmentOut:
         data['DestinatarioNumeroSMS'] = shipment.delivery_address.mobile or shipment.customer.get_mechanism('mobile')
         data['DestinatarioEmail'] = shipment.delivery_address.email or shipment.customer.get_mechanism('email')
         data['CodProducto'] = service.code
-        data['ReferenciaCliente'] = shipment.code
-        data['Observaciones1'] =  unaccent(shipment.carrier_notes or '')
+        data['ReferenciaCliente'] = code
+        data['Observaciones1'] =  unaccent(notes)
 
         if shipment.carrier_cashondelivery and price:
             data['Reembolso'] = True
