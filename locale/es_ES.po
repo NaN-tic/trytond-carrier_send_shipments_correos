@@ -22,7 +22,8 @@ msgstr "No se dispone la etiqueta \"%(name)s\" de Correos."
 
 msgctxt "error:stock.shipment.out:"
 msgid "Select a service or default service in Correos API"
-msgstr "Seleccione un servicio o un servicio por defecto en la API de Correos"
+msgstr ""
+"Seleccione un servicio o un servicio por defecto en la API de Correos."
 
 msgctxt "field:carrier.api,correos_cc:"
 msgid "CC"
