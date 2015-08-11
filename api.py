@@ -4,14 +4,14 @@
 from trytond.model import fields
 from trytond.pool import PoolMeta
 from trytond.pyson import Eval
-
 import logging
 
 try:
     from correos.picking import *
 except ImportError:
+    logger = logging.getLogger(__name__)
     message = 'Install Correos from Pypi: pip install correos'
-    logging.getLogger('correos').error(message)
+    logger.error(message)
     raise Exception(message)
 
 __all__ = ['CarrierApi']

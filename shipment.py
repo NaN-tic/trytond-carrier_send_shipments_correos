@@ -13,6 +13,8 @@ import tempfile
 __all__ = ['ShipmentOut']
 __metaclass__ = PoolMeta
 
+logger = logging.getLogger(__name__)
+
 
 class ShipmentOut:
     __name__ = 'stock.shipment.out'
@@ -164,20 +166,17 @@ class ShipmentOut:
                         'carrier_send_date': ShipmentOut.get_carrier_date(),
                         'carrier_send_employee': ShipmentOut.get_carrier_employee() or None,
                         })
-                    logging.getLogger('correos').info(
-                        'Send shipment %s' % (shipment.code))
+                    logger.info('Send shipment %s' % (shipment.code))
                     references.append(shipment.code)
                 else:
-                    logging.getLogger('correos').error(
-                        'Not send shipment %s.' % (shipment.code))
+                    logger.error('Not send shipment %s.' % (shipment.code))
 
                 if label:
                     with tempfile.NamedTemporaryFile(
                             prefix='%s-correos-%s-' % (dbname, reference),
                             suffix='.pdf', delete=False) as temp:
                         temp.write(decodestring(label))
-                    logging.getLogger('correos').info(
-                        'Generated tmp label %s' % (temp.name))
+                    logger.info('Generated tmp label %s' % (temp.name))
                     temp.close()
                     labels.append(temp.name)
                 else:
@@ -185,14 +184,14 @@ class ShipmentOut:
                             'name': shipment.rec_name,
                             }, raise_exception=False)
                     errors.append(message)
-                    logging.getLogger('correos').error(message)
+                    logger.error(message)
 
                 if error:
                     message = self.raise_user_error('correos_not_send_error', {
                             'name': shipment.rec_name,
                             'error': error,
                             }, raise_exception=False)
-                    logging.getLogger('correos').error(message)
+                    logger.error(message)
                     errors.append(message)
 
         return references, labels, errors
@@ -209,7 +208,7 @@ class ShipmentOut:
         with Picking(api.username, api.password, api.correos_code, api.debug) as picking_api:
             for shipment in shipments:
                 if not shipment.carrier_tracking_ref:
-                    logging.getLogger('carrier_send_shipment_correos').error(
+                    logger.error(
                         'Shipment %s has not been sent by Correos.'
                         % (shipment.code))
                     continue
@@ -221,7 +220,7 @@ class ShipmentOut:
                 label = picking_api.label(data)
 
                 if not label:
-                    logging.getLogger('correos').error(
+                    logger.error(
                         'Label for shipment %s is not available from Correos.'
                         % shipment.code)
                     continue
@@ -229,7 +228,7 @@ class ShipmentOut:
                         prefix='%s-correos-%s-' % (dbname, reference),
                         suffix='.pdf', delete=False) as temp:
                     temp.write(decodestring(label))
-                logging.getLogger('correos').info(
+                logger.info(
                     'Generated tmp label %s' % (temp.name))
                 temp.close()
                 labels.append(temp.name)
