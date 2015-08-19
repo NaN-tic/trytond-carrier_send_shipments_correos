@@ -3,7 +3,7 @@
 # copyright notices and license terms.
 from trytond.model import fields
 from trytond.pool import PoolMeta
-from trytond.pyson import Eval
+from trytond.pyson import Eval, Not, Equal
 import logging
 
 try:
@@ -35,6 +35,13 @@ class CarrierApi:
         res = super(CarrierApi, cls).get_carrier_app()
         res.append(('correos', 'Correos'))
         return res
+
+    @classmethod
+    def view_attributes(cls):
+        return super(CarrierApi, cls).view_attributes() + [
+            ('//page[@id="correos"]', 'state', {
+                    'invisible': Not(Equal(Eval('method'), 'correos')),
+                    })]
 
     def test_correos(self, api):
         '''

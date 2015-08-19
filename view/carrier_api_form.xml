@@ -4,7 +4,7 @@ The COPYRIGHT file at the top level of this repository contains the full
 copyright notices and license terms. -->
 <data>
     <xpath expr="/form/notebook/page[@id='api']" position="after">
-        <page string="Correos" id="correos" states="{'invisible': Not(Equal(Eval('method'), 'correos'))}">
+        <page string="Correos" id="correos">
             <label name="correos_code"/>
             <field name="correos_code"/>
             <label name="correos_cc"/>
