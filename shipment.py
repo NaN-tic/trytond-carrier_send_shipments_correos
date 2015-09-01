@@ -67,14 +67,14 @@ class ShipmentOut:
         data['RemitenteNif'] = shipment.company.party.vat_number
         data['RemitenteDireccion'] = unaccent(remitente_address.street)
         data['RemitenteLocalidad'] = unaccent(remitente_address.city)
-        data['RemitenteProvincia'] = remitente_address.subdivision and remitente_address.subdivision.name or ''
+        data['RemitenteProvincia'] = remitente_address.subdivision and unaccent(remitente_address.subdivision.name) or ''
         data['RemitenteCP'] = remitente_address.zip
         data['RemitenteTelefonocontacto'] = remitente_address.phone or shipment.company.party.get_mechanism('phone')
         data['RemitenteEmail'] = remitente_address.email or shipment.company.party.get_mechanism('email')
         data['DestinatarioNombre'] = unaccent(shipment.customer.name)
         data['DestinatarioDireccion'] = unaccent(shipment.delivery_address.street)
         data['DestinatarioLocalidad'] = unaccent(shipment.delivery_address.city)
-        data['DestinatarioProvincia'] = shipment.delivery_address.subdivision and shipment.delivery_address.subdivision.name or ''
+        data['DestinatarioProvincia'] = shipment.delivery_address.subdivision and unaccent(shipment.delivery_address.subdivision.name) or ''
         data['DestinatarioCP'] = shipment.delivery_address.zip
         data['DestinatarioPais'] = shipment.delivery_address.country and shipment.delivery_address.country.code or ''
         data['DestinatarioTelefonocontacto'] = shipment.delivery_address.phone or shipment.customer.get_mechanism('phone')
