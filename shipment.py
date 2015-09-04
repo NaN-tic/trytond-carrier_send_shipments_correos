@@ -46,6 +46,8 @@ class ShipmentOut:
         :param correos_oficina: str
         Return data
         '''
+        Uom = Pool().get('product.uom')
+
         packages = shipment.number_packages
         if not packages or packages == 0:
             packages = 1
@@ -91,10 +93,17 @@ class ShipmentOut:
             data['NumeroCuenta'] = api.correos_cc
 
         if weight and hasattr(shipment, 'weight_func'):
-            weight = str(shipment.weight_func)
-            if weight == '0.0':
-                weight = '1'
-            data['Peso'] = weight
+            weight = shipment.weight_func
+            if weight == 0:
+                weight = 1
+            if api.weight_api_unit:
+                if shipment.weight_uom:
+                    weight = Uom.compute_qty(
+                        shipment.weight_uom, weight, api.weight_api_unit)
+                elif api.weight_unit:
+                    weight = Uom.compute_qty(
+                        api.weight_unit, weight, api.weight_api_unit)
+            data['peso'] = str(weight)
 
         if correos_oficina:
             data['OficinaElegida'] = correos_oficina
