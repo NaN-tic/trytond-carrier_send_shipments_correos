@@ -66,7 +66,7 @@ class ShipmentOut:
         data = {}
         data['TotalBultos'] = packages
         data['RemitenteNombre'] = shipment.company.party.name
-        data['RemitenteNif'] = shipment.company.party.vat_number
+        data['RemitenteNif'] = shipment.company.party.vat_code or shipment.company.party.identifier_code
         data['RemitenteDireccion'] = unaccent(remitente_address.street)
         data['RemitenteLocalidad'] = unaccent(remitente_address.city)
         data['RemitenteProvincia'] = remitente_address.subdivision and unaccent(remitente_address.subdivision.name) or ''
