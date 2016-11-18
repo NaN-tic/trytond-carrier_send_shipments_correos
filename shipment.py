@@ -129,7 +129,8 @@ class ShipmentOut:
         default_service = CarrierApi.get_default_carrier_service(api)
         dbname = Transaction().cursor.dbname
 
-        with Picking(api.username, api.password, api.correos_code, api.debug) as picking_api:
+        with Picking(api.username, api.password, api.correos_code,
+                timeout=api.timeout, debug=api.debug) as picking_api:
             for shipment in shipments:
                 service = shipment.carrier_service or shipment.carrier.service or default_service
                 if not service:
@@ -172,6 +173,7 @@ class ShipmentOut:
                         'carrier_tracking_ref': reference,
                         'carrier_service': service,
                         'carrier_delivery': True,
+                        'carrier_printed': True,
                         'carrier_send_date': ShipmentOut.get_carrier_date(),
                         'carrier_send_employee': ShipmentOut.get_carrier_employee() or None,
                         })
@@ -214,7 +216,8 @@ class ShipmentOut:
         labels = []
         dbname = Transaction().cursor.dbname
 
-        with Picking(api.username, api.password, api.correos_code, api.debug) as picking_api:
+        with Picking(api.username, api.password, api.correos_code,
+                timeout=api.timeout, debug=api.debug) as picking_api:
             for shipment in shipments:
                 if not shipment.carrier_tracking_ref:
                     logger.error(
