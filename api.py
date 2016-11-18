@@ -15,10 +15,10 @@ except ImportError:
     raise Exception(message)
 
 __all__ = ['CarrierApi']
-__metaclass__ = PoolMeta
 
 
 class CarrierApi:
+    __metaclass__ = PoolMeta
     __name__ = 'carrier.api'
     correos_code = fields.Char('Code', states={
             'required': Eval('method') == 'correos',

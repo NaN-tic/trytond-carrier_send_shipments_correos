@@ -11,12 +11,12 @@ import logging
 import tempfile
 
 __all__ = ['ShipmentOut']
-__metaclass__ = PoolMeta
 
 logger = logging.getLogger(__name__)
 
 
 class ShipmentOut:
+    __metaclass__ = PoolMeta
     __name__ = 'stock.shipment.out'
 
     @classmethod
@@ -127,7 +127,7 @@ class ShipmentOut:
         errors = []
 
         default_service = CarrierApi.get_default_carrier_service(api)
-        dbname = Transaction().cursor.dbname
+        dbname = Transaction().database.name
 
         with Picking(api.username, api.password, api.correos_code,
                 timeout=api.timeout, debug=api.debug) as picking_api:
@@ -214,7 +214,7 @@ class ShipmentOut:
         Not available labels from Correos API. Not return labels
         '''
         labels = []
-        dbname = Transaction().cursor.dbname
+        dbname = Transaction().database.name
 
         with Picking(api.username, api.password, api.correos_code,
                 timeout=api.timeout, debug=api.debug) as picking_api:

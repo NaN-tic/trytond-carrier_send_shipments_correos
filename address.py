@@ -5,10 +5,10 @@ from trytond.model import fields
 from trytond.pool import PoolMeta
 
 __all__ = ['Address']
-__metaclass__ = PoolMeta
 
 
 class Address:
+    __metaclass__ = PoolMeta
     __name__ = 'party.address'
     correos = fields.Char('Correos',
         help='Office Correos code to delivery shipment')
