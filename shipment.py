@@ -25,8 +25,6 @@ class ShipmentOut:
         cls._error_messages.update({
             'correos_add_services': 'Select a service or default service in Correos API',
             'correos_not_country': 'Add country in shipment "%(name)s" delivery address',
-            'correos_not_price': 'Shipment "%(name)s" not have price and send '
-                'cashondelivery',
             'correos_error_zip': 'Correos not accept zip "%(zip)s"',
             'correos_not_send': 'Not send shipment %(name)s',
             'correos_not_send_error': 'Not send shipment %(name)s. %(error)s',
@@ -53,7 +51,7 @@ class ShipmentOut:
             packages = 1
 
         remitente_address = shipment.warehouse.address or shipment.company.party.addresses[0]
-        
+
         if api.reference_origin and hasattr(shipment, 'origin'):
             code = shipment.origin and shipment.origin.rec_name or shipment.code
         else:
@@ -157,13 +155,7 @@ class ShipmentOut:
 
                 price = None
                 if shipment.carrier_cashondelivery:
-                    price = ShipmentOut.get_price_ondelivery_shipment_out(shipment)
-                    if not price:
-                        message = self.raise_user_error('correos_not_price', {
-                                'name': shipment.rec_name,
-                                }, raise_exception=False)
-                        errors.append(message)
-                        continue
+                    price = shipment.carrier_cashondelivery_price
 
                 data = self.correos_picking_data(api, shipment, service, price, api.weight, correos_oficina)
                 reference, label, error = picking_api.create(data)
