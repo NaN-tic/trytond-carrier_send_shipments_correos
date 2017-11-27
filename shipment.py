@@ -23,17 +23,21 @@ class ShipmentOut:
     def __setup__(cls):
         super(ShipmentOut, cls).__setup__()
         cls._error_messages.update({
-            'correos_add_services': 'Select a service or default service in Correos API',
-            'correos_not_country': 'Add country in shipment "%(name)s" delivery address',
+            'correos_add_services': ('Select a service or default '
+                'service in Correos API'),
+            'correos_not_country': ('Add country in shipment "%(name)s" '
+                'delivery address'),
             'correos_error_zip': 'Correos not accept zip "%(zip)s"',
             'correos_not_send': 'Not send shipment %(name)s',
             'correos_not_send_error': 'Not send shipment %(name)s. %(error)s',
             'correos_not_label': 'Not available "%(name)s" label from Correos',
-            'correos_add_oficina': 'Add a office Correos to delivery or change service',
+            'correos_add_oficina': ('Add a office Correos to delivery '
+                'or change service'),
             })
 
     @staticmethod
-    def correos_picking_data(api, shipment, service, price=None, weight=False, correos_oficina=None):
+    def correos_picking_data(api, shipment, service, price=None, weight=False,
+            correos_oficina=None):
         '''
         Correos Picking Data
         :param api: obj
@@ -50,7 +54,8 @@ class ShipmentOut:
         if not packages or packages == 0:
             packages = 1
 
-        remitente_address = shipment.warehouse.address or shipment.company.party.addresses[0]
+        remitente_address = (shipment.warehouse.address
+            or shipment.company.party.addresses[0])
 
         if api.reference_origin and hasattr(shipment, 'origin'):
             code = shipment.origin and shipment.origin.rec_name or shipment.code
@@ -64,22 +69,35 @@ class ShipmentOut:
         data = {}
         data['TotalBultos'] = packages
         data['RemitenteNombre'] = shipment.company.party.name
-        data['RemitenteNif'] = shipment.company.party.vat_code or shipment.company.party.identifier_code
+        data['RemitenteNif'] = (shipment.company.party.vat_code
+            or shipment.company.party.identifier_code)
         data['RemitenteDireccion'] = unaccent(remitente_address.street)
         data['RemitenteLocalidad'] = unaccent(remitente_address.city)
-        data['RemitenteProvincia'] = remitente_address.subdivision and unaccent(remitente_address.subdivision.name) or ''
+        data['RemitenteProvincia'] = (remitente_address.subdivision
+            and unaccent(remitente_address.subdivision.name) or '')
         data['RemitenteCP'] = remitente_address.zip
-        data['RemitenteTelefonocontacto'] = remitente_address.phone or shipment.company.party.get_mechanism('phone')
-        data['RemitenteEmail'] = remitente_address.email or shipment.company.party.get_mechanism('email')
+        data['RemitenteTelefonocontacto'] = (remitente_address.phone
+            or shipment.company.party.get_mechanism('phone'))
+        data['RemitenteEmail'] = (remitente_address.email
+            or shipment.company.party.get_mechanism('email'))
         data['DestinatarioNombre'] = unaccent(shipment.customer.name)
         data['DestinatarioDireccion'] = unaccent(shipment.delivery_address.street)
         data['DestinatarioLocalidad'] = unaccent(shipment.delivery_address.city)
-        data['DestinatarioProvincia'] = shipment.delivery_address.subdivision and unaccent(shipment.delivery_address.subdivision.name) or ''
-        data['DestinatarioCP'] = shipment.delivery_address.zip
-        data['DestinatarioPais'] = shipment.delivery_address.country and shipment.delivery_address.country.code or ''
-        data['DestinatarioTelefonocontacto'] = shipment.delivery_address.phone or shipment.customer.get_mechanism('phone')
-        data['DestinatarioNumeroSMS'] = shipment.delivery_address.mobile or shipment.customer.get_mechanism('mobile')
-        data['DestinatarioEmail'] = shipment.delivery_address.email or shipment.customer.get_mechanism('email')
+        data['DestinatarioProvincia'] = (shipment.delivery_address.subdivision
+            and unaccent(shipment.delivery_address.subdivision.name) or '')
+        if (shipment.delivery_address.country
+                and (shipment.delivery_address.country.code == 'ES')):
+            data['DestinatarioCP'] = shipment.delivery_address.zip
+        else:
+            data['DestinatarioZIP'] = shipment.delivery_address.zip
+        data['DestinatarioPais'] = (shipment.delivery_address.country
+            and shipment.delivery_address.country.code or '')
+        data['DestinatarioTelefonocontacto'] = (shipment.delivery_address.phone
+            or shipment.customer.get_mechanism('phone'))
+        data['DestinatarioNumeroSMS'] = (shipment.delivery_address.mobile
+            or shipment.customer.get_mechanism('mobile'))
+        data['DestinatarioEmail'] = (shipment.delivery_address.email
+            or shipment.customer.get_mechanism('email'))
         data['CodProducto'] = service.code
         data['ReferenciaCliente'] = code
         data['Observaciones1'] =  unaccent(notes)
@@ -130,7 +148,8 @@ class ShipmentOut:
         with Picking(api.username, api.password, api.correos_code,
                 timeout=api.timeout, debug=api.debug) as picking_api:
             for shipment in shipments:
-                service = shipment.carrier_service or shipment.carrier.service or default_service
+                service = (shipment.carrier_service or shipment.carrier.service
+                    or default_service)
                 if not service:
                     message = self.raise_user_error('correos_add_services', {},
                         raise_exception=False)
@@ -157,7 +176,8 @@ class ShipmentOut:
                 if shipment.carrier_cashondelivery:
                     price = shipment.carrier_cashondelivery_price
 
-                data = self.correos_picking_data(api, shipment, service, price, api.weight, correos_oficina)
+                data = self.correos_picking_data(
+                    api, shipment, service, price, api.weight, correos_oficina)
                 reference, label, error = picking_api.create(data)
 
                 if reference:
