@@ -1,4 +1,4 @@
-# 
+#
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
@@ -13,12 +13,24 @@ msgstr ""
 "servicio."
 
 msgctxt "error:stock.shipment.out:"
+msgid "Add country in shipment \"%(name)s\" delivery address"
+msgstr "Añade un país a la dirección de envío del albarán \"%(name)s\""
+
+msgctxt "error:stock.shipment.out:"
 msgid "Correos not accept zip \"%(zip)s\""
 msgstr "Correos no accepta el código postal \"%(zip)s\"."
 
 msgctxt "error:stock.shipment.out:"
 msgid "Not available \"%(name)s\" label from Correos"
 msgstr "No se dispone la etiqueta \"%(name)s\" de Correos."
+
+msgctxt "error:stock.shipment.out:"
+msgid "Not send shipment %(name)s"
+msgstr "No se ha enviado el albarán %(name)s"
+
+msgctxt "error:stock.shipment.out:"
+msgid "Not send shipment %(name)s. %(error)s"
+msgstr "No se ha enviado el albarán %(name)s. %(error)s"
 
 msgctxt "error:stock.shipment.out:"
 msgid "Select a service or default service in Correos API"
