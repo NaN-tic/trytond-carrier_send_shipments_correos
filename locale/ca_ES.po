@@ -1,4 +1,4 @@
-# 
+#
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
@@ -12,12 +12,24 @@ msgstr ""
 "Afegeix una oficina de Correos en l'adreça d'entrega o canvia de servei."
 
 msgctxt "error:stock.shipment.out:"
+msgid "Add country in shipment \"%(name)s\" delivery address"
+msgstr "Afegeix un país en l'adreça d'enviament de l'albarà \"%(name)s\""
+
+msgctxt "error:stock.shipment.out:"
 msgid "Correos not accept zip \"%(zip)s\""
 msgstr "Correos no accepta el codi postal \"%(zip)s\"."
 
 msgctxt "error:stock.shipment.out:"
 msgid "Not available \"%(name)s\" label from Correos"
 msgstr "No està disponible l'etiqueta \"%(name)s\" de Correos."
+
+msgctxt "error:stock.shipment.out:"
+msgid "Not send shipment %(name)s"
+msgstr "No s'ha enviant l'abarà %(name)s"
+
+msgctxt "error:stock.shipment.out:"
+msgid "Not send shipment %(name)s. %(error)s"
+msgstr "No s'ha enviant l'abarà %(name)s. %(error)s"
 
 msgctxt "error:stock.shipment.out:"
 msgid "Select a service or default service in Correos API"
