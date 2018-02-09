@@ -7,6 +7,7 @@ from correos.picking import Picking
 from correos.utils import delivery_oficina
 from trytond.modules.carrier_send_shipments.tools import unaccent
 from base64 import decodestring
+from decimal import Decimal
 import logging
 import tempfile
 
@@ -56,6 +57,7 @@ class ShipmentOut:
 
         remitente_address = (shipment.warehouse.address
             or shipment.company.party.addresses[0])
+        delivery_address = shipment.delivery_address
 
         if api.reference_origin and hasattr(shipment, 'origin'):
             code = shipment.origin and shipment.origin.rec_name or shipment.code
@@ -81,22 +83,22 @@ class ShipmentOut:
         data['RemitenteEmail'] = (remitente_address.email
             or shipment.company.party.get_mechanism('email'))
         data['DestinatarioNombre'] = unaccent(shipment.customer.name)
-        data['DestinatarioDireccion'] = unaccent(shipment.delivery_address.street)
-        data['DestinatarioLocalidad'] = unaccent(shipment.delivery_address.city)
-        data['DestinatarioProvincia'] = (shipment.delivery_address.subdivision
-            and unaccent(shipment.delivery_address.subdivision.name) or '')
-        if (shipment.delivery_address.country
-                and (shipment.delivery_address.country.code == 'ES')):
-            data['DestinatarioCP'] = shipment.delivery_address.zip
+        data['DestinatarioDireccion'] = unaccent(delivery_address.street)
+        data['DestinatarioLocalidad'] = unaccent(delivery_address.city)
+        data['DestinatarioProvincia'] = (delivery_address.subdivision
+            and unaccent(delivery_address.subdivision.name) or '')
+        if (delivery_address.country
+                and (delivery_address.country.code == 'ES')):
+            data['DestinatarioCP'] = delivery_address.zip
         else:
-            data['DestinatarioZIP'] = shipment.delivery_address.zip
-        data['DestinatarioPais'] = (shipment.delivery_address.country
-            and shipment.delivery_address.country.code or '')
-        data['DestinatarioTelefonocontacto'] = (shipment.delivery_address.phone
+            data['DestinatarioZIP'] = delivery_address.zip
+        data['DestinatarioPais'] = (delivery_address.country
+            and delivery_address.country.code or '')
+        data['DestinatarioTelefonocontacto'] = (delivery_address.phone
             or shipment.customer.get_mechanism('phone'))
-        data['DestinatarioNumeroSMS'] = (shipment.delivery_address.mobile
+        data['DestinatarioNumeroSMS'] = (delivery_address.mobile
             or shipment.customer.get_mechanism('mobile'))
-        data['DestinatarioEmail'] = (shipment.delivery_address.email
+        data['DestinatarioEmail'] = (delivery_address.email
             or shipment.customer.get_mechanism('email'))
         data['CodProducto'] = service.code
         data['ReferenciaCliente'] = code
@@ -123,6 +125,19 @@ class ShipmentOut:
 
         if correos_oficina:
             data['OficinaElegida'] = correos_oficina
+
+        if (remitente_address.country and delivery_address.country
+                and (remitente_address.country.id != delivery_address.country.id)):
+            data['Aduana'] = True
+            data['AduanaTipoEnvio'] = api.correos_aduana_tipo_envio or '2'
+            data['AduanaEnvioComercial'] = api.correos_envio_comercial or 'S'
+            data['AduanaFacturaSuperiora500'] = ('S' if price > Decimal('500.00')
+                else 'N')
+            data['AduanaDUAConCorreos'] = api.correos_dua_con_correos or 'N'
+            data['AduanaCantidad'] = str(len(shipment.outgoing_moves))
+            data['AduanaDescripcion'] = code
+            data['AduanaPesoneto'] = str(weight or 0)
+            data['AduanaValorneto'] = str(price or Decimal('0.0'))
 
         return data
 

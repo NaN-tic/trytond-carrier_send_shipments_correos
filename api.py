@@ -20,12 +20,38 @@ __metaclass__ = PoolMeta
 
 class CarrierApi:
     __name__ = 'carrier.api'
-    correos_code = fields.Char('Code', states={
+    correos_code = fields.Char('Code',
+        states={
             'required': Eval('method') == 'correos',
         }, help='Correos Code (CodeEtiquetador)')
-    correos_cc = fields.Char('CC', states={
+    correos_cc = fields.Char('CC',
+        states={
             'required': Eval('method') == 'correos',
         }, help='Correos Bank Number')
+    correos_aduana_tipo_envio = fields.Char('Aduana Tipo Envio',
+        states={
+            'required': Eval('method') == 'correos',
+        })
+    correos_envio_comercial = fields.Char('Aduana Envio Comercial',
+        states={
+            'required': Eval('method') == 'correos',
+        })
+    correos_dua_con_correos = fields.Char('Aduana Dua Con Correos',
+        states={
+            'required': Eval('method') == 'correos',
+        })
+
+    @staticmethod
+    def default_correos_aduana_tipo_envio():
+        return '2'
+
+    @staticmethod
+    def default_correos_envio_comercial():
+        return 'S'
+
+    @staticmethod
+    def default_correos_dua_con_correos():
+        return 'N'
 
     @classmethod
     def get_carrier_app(cls):
