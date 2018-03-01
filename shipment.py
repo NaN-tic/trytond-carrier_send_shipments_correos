@@ -40,14 +40,14 @@ class ShipmentOut:
             })
 
     @staticmethod
-    def correos_picking_data(api, shipment, service, price=None, weight=False,
+    def correos_picking_data(api, shipment, service, price, weight=False,
             correos_oficina=None):
         '''
         Correos Picking Data
         :param api: obj
         :param shipment: obj
         :param service: str
-        :param price: string
+        :param price: decimal
         :param weight: bol
         :param correos_oficina: str
         Return data
@@ -106,7 +106,7 @@ class ShipmentOut:
         data['ReferenciaCliente'] = code
         data['Observaciones1'] =  unaccent(notes)
 
-        if shipment.carrier_cashondelivery and price:
+        if shipment.carrier_cashondelivery:
             data['Reembolso'] = True
             data['TipoReembolso'] = 'RC'
             data['Importe'] = price
@@ -140,7 +140,7 @@ class ShipmentOut:
             data['AduanaCantidad'] = str(len(shipment.outgoing_moves))
             data['AduanaDescripcion'] = code
             data['AduanaPesoneto'] = data['Peso']
-            data['AduanaValorneto'] = str(price or Decimal('0.0'))
+            data['AduanaValorneto'] = price
         else:
             data['RemitenteNumeroSMS'] = remitente.mobile or ''
 
@@ -199,9 +199,10 @@ class ShipmentOut:
                     errors.append(message)
                     continue
 
-                price = None
                 if shipment.carrier_cashondelivery:
                     price = shipment.carrier_cashondelivery_price
+                else:
+                    price = shipment.total_amount_func
 
                 data = self.correos_picking_data(
                     api, shipment, service, price, api.weight, correos_oficina)
