@@ -28,7 +28,6 @@ class ShipmentOut:
             'correos_not_country': ('Add country in shipment "%(name)s" '
                 'delivery address'),
             'correos_error_zip': 'Correos not accept zip "%(zip)s"',
-            'correos_not_send': 'Not send shipment %(name)s',
             'correos_not_send_error': 'Not send shipment %(name)s. %(error)s',
             'correos_not_label': 'Not available "%(name)s" label from Correos',
             'correos_add_oficina': ('Add a office Correos to delivery '
