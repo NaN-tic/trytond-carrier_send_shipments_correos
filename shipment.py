@@ -222,8 +222,7 @@ class ShipmentOut:
     @classmethod
     def print_labels_correos(self, api, shipments):
         '''
-        Get labels from shipments out from Correos
-        Not available labels from Correos API. Not return labels
+        Get Correos labels from Shipment Out
         '''
         labels = []
         dbname = Transaction().database.name
