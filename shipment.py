@@ -11,12 +11,11 @@ import logging
 import tempfile
 
 __all__ = ['ShipmentOut']
-__metaclass__ = PoolMeta
-
 logger = logging.getLogger(__name__)
 
 
 class ShipmentOut:
+    __metaclass__ = PoolMeta
     __name__ = 'stock.shipment.out'
 
     @classmethod
@@ -27,8 +26,6 @@ class ShipmentOut:
                 'service in Correos API'),
             'correos_not_country': ('Add country in shipment "%(name)s" '
                 'delivery address'),
-            'correos_error_zip': 'Correos not accept zip "%(zip)s"',
-            'correos_not_send': 'Not send shipment %(name)s',
             'correos_not_send_error': 'Not send shipment %(name)s. %(error)s',
             'correos_not_label': 'Not available "%(name)s" label from Correos',
             'correos_add_oficina': ('Add a office Correos to delivery '
