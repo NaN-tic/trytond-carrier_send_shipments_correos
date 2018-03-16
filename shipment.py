@@ -4,7 +4,7 @@
 from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
 from correos.picking import Picking
-from correos.utils import delivery_oficina
+from correos.utils import DELIVERY_OFICINA, CASHONDELIVERY_SERVICES
 from trytond.modules.carrier_send_shipments.tools import unaccent
 from base64 import decodestring
 from decimal import Decimal
@@ -37,6 +37,9 @@ class ShipmentOut:
                 'or change service'),
             'correos_not_national_cashondelivery': ('Not available Correos '
                 'Internation delivery and cashondelivery'),
+            'correos_cashondelivery_services': ('Correos "%(service)s" service '
+                'and cash on delivery is not valid. Please select an option: '
+                '"%(services)s"'),
             })
 
     @staticmethod
@@ -138,7 +141,7 @@ class ShipmentOut:
                 else 'N')
             data['AduanaDUAConCorreos'] = api.correos_dua_con_correos or 'N'
             data['AduanaCantidad'] = str(len(shipment.outgoing_moves))
-            data['AduanaDescripcion'] = code
+            data['AduanaDescripcion'] = api.correos_aduana_description or ''
             data['AduanaPesoneto'] = data['Peso']
             data['AduanaValorneto'] = price
         else:
@@ -176,9 +179,18 @@ class ShipmentOut:
                     errors.append(message)
                     continue
 
+                if (shipment.carrier_cashondelivery
+                        and service.code not in CASHONDELIVERY_SERVICES):
+                    message = self.raise_user_error(
+                        'correos_cashondelivery_services', {
+                            'service': service.code,
+                            'services': ', '.join(CASHONDELIVERY_SERVICES),
+                        }, raise_exception=False)
+                    errors.append(message)
+                    continue
+
                 correos_oficina = None
-                services_oficina = delivery_oficina()
-                if service.code in services_oficina:
+                if service.code in DELIVERY_OFICINA:
                     if not shipment.delivery_address.correos:
                         message = self.raise_user_error('correos_add_oficina', {},
                             raise_exception=False)
