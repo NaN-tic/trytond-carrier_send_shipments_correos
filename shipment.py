@@ -115,11 +115,11 @@ class ShipmentOut:
             data['Importe'] = price
             data['NumeroCuenta'] = api.correos_cc
 
-        sweight = 1
+        sweight = 100
         if weight and hasattr(shipment, 'weight_func'):
             sweight = shipment.weight_func
             if sweight == 0:
-                sweight = 1
+                sweight = 100
             if api.weight_api_unit:
                 if shipment.weight_uom:
                     sweight = Uom.compute_qty(
