@@ -9,6 +9,14 @@ copyright notices and license terms. -->
             <field name="correos_code"/>
             <label name="correos_cc"/>
             <field name="correos_cc"/>
+            <label name="correos_aduana_tipo_envio"/>
+            <field name="correos_aduana_tipo_envio"/>
+            <label name="correos_aduana_description"/>
+            <field name="correos_aduana_description"/>
+            <label name="correos_envio_comercial"/>
+            <field name="correos_envio_comercial"/>
+            <label name="correos_dua_con_correos"/>
+            <field name="correos_dua_con_correos"/>
         </page>
     </xpath>
 </data>
