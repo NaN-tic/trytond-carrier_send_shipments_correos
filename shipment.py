@@ -4,15 +4,16 @@
 from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
 from correos.picking import Picking
-from correos.utils import delivery_oficina
+from correos.utils import DELIVERY_OFICINA, CASHONDELIVERY_SERVICES
 from trytond.modules.carrier_send_shipments.tools import unaccent
 from base64 import decodestring
+from decimal import Decimal
 import logging
 import tempfile
 
 __all__ = ['ShipmentOut']
-
 logger = logging.getLogger(__name__)
+_CORREOS_NACIONAL = ['ES', 'AD']
 
 
 class ShipmentOut:
@@ -27,22 +28,26 @@ class ShipmentOut:
                 'service in Correos API'),
             'correos_not_country': ('Add country in shipment "%(name)s" '
                 'delivery address'),
-            'correos_error_zip': 'Correos not accept zip "%(zip)s"',
             'correos_not_send_error': 'Not send shipment %(name)s. %(error)s',
             'correos_not_label': 'Not available "%(name)s" label from Correos',
             'correos_add_oficina': ('Add a office Correos to delivery '
                 'or change service'),
+            'correos_not_national_cashondelivery': ('Not available Correos '
+                'Internation delivery and cashondelivery'),
+            'correos_cashondelivery_services': ('Correos "%(service)s" service '
+                'and cash on delivery is not valid. Please select an option: '
+                '"%(services)s"'),
             })
 
     @staticmethod
-    def correos_picking_data(api, shipment, service, price=None, weight=False,
+    def correos_picking_data(api, shipment, service, price, weight=False,
             correos_oficina=None):
         '''
         Correos Picking Data
         :param api: obj
         :param shipment: obj
         :param service: str
-        :param price: string
+        :param price: decimal
         :param weight: bol
         :param correos_oficina: str
         Return data
@@ -53,8 +58,9 @@ class ShipmentOut:
         if not packages or packages == 0:
             packages = 1
 
-        remitente_address = (shipment.warehouse.address
-            or shipment.company.party.addresses[0])
+        remitente = shipment.company.party
+        remitente_address = (shipment.warehouse.address or remitente.addresses[0])
+        delivery_address = shipment.delivery_address
 
         if api.reference_origin and hasattr(shipment, 'origin'):
             code = shipment.origin and shipment.origin.rec_name or shipment.code
@@ -67,61 +73,73 @@ class ShipmentOut:
 
         data = {}
         data['TotalBultos'] = packages
-        data['RemitenteNombre'] = shipment.company.party.name
-        data['RemitenteNif'] = (shipment.company.party.vat_code
-            or shipment.company.party.identifier_code)
+        data['RemitenteNombre'] = remitente.name
+        data['RemitenteNif'] = (remitente.vat_code or remitente.identifier_code)
         data['RemitenteDireccion'] = unaccent(remitente_address.street)
         data['RemitenteLocalidad'] = unaccent(remitente_address.city)
         data['RemitenteProvincia'] = (remitente_address.subdivision
             and unaccent(remitente_address.subdivision.name) or '')
         data['RemitenteCP'] = remitente_address.zip
         data['RemitenteTelefonocontacto'] = (remitente_address.phone
-            or shipment.company.party.get_mechanism('phone'))
+            or remitente.get_mechanism('phone'))
         data['RemitenteEmail'] = (remitente_address.email
-            or shipment.company.party.get_mechanism('email'))
+            or remitente.get_mechanism('email'))
         data['DestinatarioNombre'] = unaccent(shipment.customer.name)
-        data['DestinatarioDireccion'] = unaccent(shipment.delivery_address.street)
-        data['DestinatarioLocalidad'] = unaccent(shipment.delivery_address.city)
-        data['DestinatarioProvincia'] = (shipment.delivery_address.subdivision
-            and unaccent(shipment.delivery_address.subdivision.name) or '')
-        if (shipment.delivery_address.country
-                and (shipment.delivery_address.country.code == 'ES')):
-            data['DestinatarioCP'] = shipment.delivery_address.zip
+        data['DestinatarioDireccion'] = unaccent(delivery_address.street)
+        data['DestinatarioLocalidad'] = unaccent(delivery_address.city)
+        data['DestinatarioProvincia'] = (delivery_address.subdivision
+            and unaccent(delivery_address.subdivision.name) or '')
+        if (delivery_address.country
+                and delivery_address.country.code in _CORREOS_NACIONAL):
+            data['DestinatarioCP'] = delivery_address.zip
         else:
-            data['DestinatarioZIP'] = shipment.delivery_address.zip
-        data['DestinatarioPais'] = (shipment.delivery_address.country
-            and shipment.delivery_address.country.code or '')
-        data['DestinatarioTelefonocontacto'] = (shipment.delivery_address.phone
-            or shipment.customer.get_mechanism('phone'))
-        data['DestinatarioNumeroSMS'] = (shipment.delivery_address.mobile
-            or shipment.customer.get_mechanism('mobile'))
-        data['DestinatarioEmail'] = (shipment.delivery_address.email
-            or shipment.customer.get_mechanism('email'))
+            data['DestinatarioZIP'] = delivery_address.zip
+        data['DestinatarioPais'] = (delivery_address.country
+            and delivery_address.country.code or '')
+        data['DestinatarioTelefonocontacto'] = unspaces(shipment.phone)
+        data['DestinatarioNumeroSMS'] = unspaces(shipment.mobile)
+        data['DestinatarioEmail'] = unspaces(shipment.email)
         data['CodProducto'] = service.code
         data['ReferenciaCliente'] = code
         data['Observaciones1'] =  unaccent(notes)
 
-        if shipment.carrier_cashondelivery and price:
+        if shipment.carrier_cashondelivery:
             data['Reembolso'] = True
             data['TipoReembolso'] = 'RC'
             data['Importe'] = price
             data['NumeroCuenta'] = api.correos_cc
 
+        sweight = 100
         if weight and hasattr(shipment, 'weight_func'):
-            weight = shipment.weight_func
-            if weight == 0:
-                weight = 1
+            sweight = shipment.weight_func
+            if sweight == 0:
+                sweight = 100
             if api.weight_api_unit:
                 if shipment.weight_uom:
-                    weight = Uom.compute_qty(
-                        shipment.weight_uom, weight, api.weight_api_unit)
+                    sweight = Uom.compute_qty(
+                        shipment.weight_uom, sweight, api.weight_api_unit)
                 elif api.weight_unit:
-                    weight = Uom.compute_qty(
-                        api.weight_unit, weight, api.weight_api_unit)
-            data['peso'] = str(weight)
+                    sweight = Uom.compute_qty(
+                        api.weight_unit, sweight, api.weight_api_unit)
+        data['Peso'] = str(int(sweight))
 
         if correos_oficina:
             data['OficinaElegida'] = correos_oficina
+
+        if (delivery_address.country
+                and delivery_address.country.code not in _CORREOS_NACIONAL):
+            data['Aduana'] = True
+            data['AduanaTipoEnvio'] = api.correos_aduana_tipo_envio or '2'
+            data['AduanaEnvioComercial'] = api.correos_envio_comercial or 'S'
+            data['AduanaFacturaSuperiora500'] = ('S' if price > Decimal('500.00')
+                else 'N')
+            data['AduanaDUAConCorreos'] = api.correos_dua_con_correos or 'N'
+            data['AduanaCantidad'] = str(len(shipment.outgoing_moves))
+            data['AduanaDescripcion'] = api.correos_aduana_description or ''
+            data['AduanaPesoneto'] = data['Peso']
+            data['AduanaValorneto'] = price
+        else:
+            data['RemitenteNumeroSMS'] = remitente.mobile or ''
 
         return data
 
@@ -155,9 +173,18 @@ class ShipmentOut:
                     errors.append(message)
                     continue
 
+                if (shipment.carrier_cashondelivery
+                        and service.code not in CASHONDELIVERY_SERVICES):
+                    message = self.raise_user_error(
+                        'correos_cashondelivery_services', {
+                            'service': service.code,
+                            'services': ', '.join(CASHONDELIVERY_SERVICES),
+                        }, raise_exception=False)
+                    errors.append(message)
+                    continue
+
                 correos_oficina = None
-                services_oficina = delivery_oficina()
-                if service.code in services_oficina:
+                if service.code in DELIVERY_OFICINA:
                     if not shipment.delivery_address.correos:
                         message = self.raise_user_error('correos_add_oficina', {},
                             raise_exception=False)
@@ -171,9 +198,17 @@ class ShipmentOut:
                     errors.append(message)
                     continue
 
-                price = None
+                if (shipment.delivery_address.country.code not in _CORREOS_NACIONAL
+                        and shipment.carrier_cashondelivery):
+                    message = self.raise_user_error('correos_not_national_cashondelivery', {},
+                        raise_exception=False)
+                    errors.append(message)
+                    continue
+
                 if shipment.carrier_cashondelivery:
                     price = shipment.carrier_cashondelivery_price
+                else:
+                    price = shipment.total_amount_func
 
                 data = self.correos_picking_data(
                     api, shipment, service, price, api.weight, correos_oficina)

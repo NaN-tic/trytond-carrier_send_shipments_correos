@@ -4,15 +4,8 @@
 from trytond.model import fields
 from trytond.pool import PoolMeta
 from trytond.pyson import Eval, Not, Equal
+from correos.picking import *
 import logging
-
-try:
-    from correos.picking import *
-except ImportError:
-    logger = logging.getLogger(__name__)
-    message = 'Install Correos: pip install correos'
-    logger.error(message)
-    raise Exception(message)
 
 __all__ = ['CarrierApi']
 
@@ -20,12 +13,42 @@ __all__ = ['CarrierApi']
 class CarrierApi:
     __metaclass__ = PoolMeta
     __name__ = 'carrier.api'
-    correos_code = fields.Char('Code', states={
+    correos_code = fields.Char('Code',
+        states={
             'required': Eval('method') == 'correos',
         }, help='Correos Code (CodeEtiquetador)')
-    correos_cc = fields.Char('CC', states={
+    correos_cc = fields.Char('CC',
+        states={
             'required': Eval('method') == 'correos',
-        }, help='Correos Bank Number')
+        }, depends=['method'], help='Correos Bank Number')
+    correos_aduana_tipo_envio = fields.Char('Aduana Tipo Envio',
+        states={
+            'required': Eval('method') == 'correos',
+        }, depends=['method'])
+    correos_aduana_description = fields.Char('Aduana Description',
+        states={
+            'required': Eval('method') == 'correos',
+        }, depends=['method'])
+    correos_envio_comercial = fields.Char('Aduana Envio Comercial',
+        states={
+            'required': Eval('method') == 'correos',
+        }, depends=['method'])
+    correos_dua_con_correos = fields.Char('Aduana Dua Con Correos',
+        states={
+            'required': Eval('method') == 'correos',
+        }, depends=['method'])
+
+    @staticmethod
+    def default_correos_aduana_tipo_envio():
+        return '2'
+
+    @staticmethod
+    def default_correos_envio_comercial():
+        return 'S'
+
+    @staticmethod
+    def default_correos_dua_con_correos():
+        return 'N'
 
     @classmethod
     def get_carrier_app(cls):
