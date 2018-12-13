@@ -96,12 +96,9 @@ class ShipmentOut:
             data['DestinatarioZIP'] = delivery_address.zip
         data['DestinatarioPais'] = (delivery_address.country
             and delivery_address.country.code or '')
-        data['DestinatarioTelefonocontacto'] = (delivery_address.phone
-            or shipment.customer.get_mechanism('phone'))
-        data['DestinatarioNumeroSMS'] = (delivery_address.mobile
-            or shipment.customer.get_mechanism('mobile'))
-        data['DestinatarioEmail'] = (delivery_address.email
-            or shipment.customer.get_mechanism('email'))
+        data['DestinatarioTelefonocontacto'] = unspaces(shipment.phone)
+        data['DestinatarioNumeroSMS'] = unspaces(shipment.mobile)
+        data['DestinatarioEmail'] = unspaces(shipment.email)
         data['CodProducto'] = service.code
         data['ReferenciaCliente'] = code
         data['Observaciones1'] =  unaccent(notes)
