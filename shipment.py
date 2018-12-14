@@ -5,7 +5,7 @@ from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
 from correos.picking import Picking
 from correos.utils import DELIVERY_OFICINA, CASHONDELIVERY_SERVICES
-from trytond.modules.carrier_send_shipments.tools import unaccent
+from trytond.modules.carrier_send_shipments.tools import unaccent, unspaces
 from base64 import decodestring
 from decimal import Decimal
 import logging
